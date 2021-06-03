@@ -1,16 +1,51 @@
 package com.caiiiac.hosp.cmn.controller;
 
 import com.caiiiac.hosp.cmn.service.DictService;
+import com.caiiiac.hosp.model.cmn.Dict;
+import com.caiiiac.hosp.result.Result;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Api(tags = "数据字典管理")
 @RestController
+@CrossOrigin
 @RequestMapping("admin/cmn/dict")
 public class DictController {
 
     @Autowired
     private DictService dictService;
+
+    @ApiOperation(value = "根据数据 id 查询子数据列表")
+    @GetMapping("findChildData/{id}")
+    public Result findChildData(@PathVariable Long id) {
+        List<Dict> list = dictService.findChildData(id);
+        return Result.ok(list);
+    }
+
+    /**
+     * 导出数据字典接口
+     * @param response
+     * @return
+     */
+    @GetMapping("exportData")
+    public void exportDict(HttpServletResponse response) {
+        dictService.exportDictData(response);
+    }
+
+    /**
+     * 导入数据字典
+     * @param file
+     * @return
+     */
+    @PostMapping("importData")
+    public Result importDict(MultipartFile file) {
+        dictService.importDictDate(file);
+        return Result.ok();
+    }
 }
