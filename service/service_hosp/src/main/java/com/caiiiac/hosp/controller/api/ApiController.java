@@ -2,6 +2,7 @@ package com.caiiiac.hosp.controller.api;
 
 import com.caiiiac.hosp.exception.HospitalException;
 import com.caiiiac.hosp.helper.HttpRequestHelper;
+import com.caiiiac.hosp.model.hosp.Hospital;
 import com.caiiiac.hosp.result.Result;
 import com.caiiiac.hosp.result.ResultCodeEnum;
 import com.caiiiac.hosp.service.HospitalService;
@@ -58,5 +59,30 @@ public class ApiController {
         // 调用 service 方法
         hospitalService.save(paramMap);
         return Result.ok();
+    }
+
+    /**
+     * 查询医院
+     * @return
+     */
+    @PostMapping("hospital/show")
+    public Result getHospital(HttpServletRequest request) {
+        // 获取医院信息
+        Map<String, String[]> requestMap = request.getParameterMap();
+        Map<String, Object> paramMap = HttpRequestHelper.switchMap(requestMap);
+        // 医院编号
+        String hoscode = (String) paramMap.get("hoscode");
+        String hospSign = (String) paramMap.get("sign");
+
+        String signKey = hospitalSetService.getSignKey(hoscode);
+
+        String signKeyMD5 = MD5.encrypt(signKey);
+
+        if (!hospSign.equals(signKeyMD5)) {
+            throw new HospitalException(ResultCodeEnum.SIGN_ERROR);
+        }
+
+        Hospital hospital = hospitalService.getByHoscode(hoscode);
+        return Result.ok(hospital);
     }
 }
