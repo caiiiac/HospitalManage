@@ -4,13 +4,16 @@ import com.caiiiac.hosp.exception.HospitalException;
 import com.caiiiac.hosp.helper.HttpRequestHelper;
 import com.caiiiac.hosp.model.hosp.Department;
 import com.caiiiac.hosp.model.hosp.Hospital;
+import com.caiiiac.hosp.model.hosp.Schedule;
 import com.caiiiac.hosp.result.Result;
 import com.caiiiac.hosp.result.ResultCodeEnum;
 import com.caiiiac.hosp.service.DepartmentService;
 import com.caiiiac.hosp.service.HospitalService;
 import com.caiiiac.hosp.service.HospitalSetService;
+import com.caiiiac.hosp.service.ScheduleService;
 import com.caiiiac.hosp.utils.MD5;
 import com.caiiiac.hosp.vo.hosp.DepartmentQueryVo;
+import com.caiiiac.hosp.vo.hosp.ScheduleQueryVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
@@ -33,6 +36,9 @@ public class ApiController {
 
     @Autowired
     private DepartmentService departmentService;
+
+    @Autowired
+    private ScheduleService scheduleService;
 
 
     /**
@@ -130,6 +136,11 @@ public class ApiController {
         return Result.ok(pageModel);
     }
 
+    /**
+     * 删除科室
+     * @param request
+     * @return
+     */
     @PostMapping("department/remove")
     public Result removeDepartment(HttpServletRequest request) {
         // 参数信息
@@ -144,6 +155,73 @@ public class ApiController {
             throw new HospitalException(ResultCodeEnum.SIGN_ERROR);
         }
         departmentService.remove(hoscode, depcode);
+        return Result.ok();
+    }
+
+    /**
+     * 上传排班
+     * @param request
+     * @return
+     */
+    @PostMapping("saveSchedule")
+    public Result saveSchedult(HttpServletRequest request) {
+        // 参数信息
+        Map<String, String[]> requestMap = request.getParameterMap();
+        Map<String, Object> paramMap = HttpRequestHelper.switchMap(requestMap);
+
+        // 判断签名是否一致
+        if (!checkSign(paramMap)) {
+            throw new HospitalException(ResultCodeEnum.SIGN_ERROR);
+        }
+
+        scheduleService.save(paramMap);
+        return Result.ok();
+    }
+
+    /**
+     * 查询排班
+     * @param request
+     * @return
+     */
+    @PostMapping("schedult/list")
+    public Result findSchedult(HttpServletRequest request) {
+        // 参数信息
+        Map<String, String[]> requestMap = request.getParameterMap();
+        Map<String, Object> paramMap = HttpRequestHelper.switchMap(requestMap);
+
+        String hoscode = (String) paramMap.get("hoscode");
+        String depcode = (String) paramMap.get("depcode");
+        int page = StringUtils.isEmpty(paramMap.get("page")) ? 1 : Integer.parseInt((String) paramMap.get("page"));
+        int limit = StringUtils.isEmpty(paramMap.get("limit")) ? 1 : Integer.parseInt((String) paramMap.get("limit"));
+
+        // 判断签名是否一致
+        if (!checkSign(paramMap)) {
+            throw new HospitalException(ResultCodeEnum.SIGN_ERROR);
+        }
+
+        ScheduleQueryVo scheduleQueryVo = new ScheduleQueryVo();
+        scheduleQueryVo.setHoscode(hoscode);
+        scheduleQueryVo.setDepcode(depcode);
+
+        Page<Schedule> pageModel = scheduleService.findPageSchedule(page, limit, scheduleQueryVo);
+        return Result.ok(pageModel);
+    }
+
+    @PostMapping("schedule/remove")
+    public Result removeSchedule(HttpServletRequest request) {
+        // 参数信息
+        Map<String, String[]> requestMap = request.getParameterMap();
+        Map<String, Object> paramMap = HttpRequestHelper.switchMap(requestMap);
+
+        // 判断签名是否一致
+        if (!checkSign(paramMap)) {
+            throw new HospitalException(ResultCodeEnum.SIGN_ERROR);
+        }
+
+        String hoscode = (String) paramMap.get("hoscode");
+        String hosSchedultId = (String) paramMap.get("hosSchedultId");
+
+        scheduleService.remove(hoscode, hosSchedultId);
         return Result.ok();
     }
 
