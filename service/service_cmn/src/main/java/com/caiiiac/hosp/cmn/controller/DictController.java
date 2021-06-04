@@ -48,4 +48,27 @@ public class DictController {
         dictService.importDictDate(file);
         return Result.ok();
     }
+
+    /**
+     * 根据 code 和 value 查询
+     * @param dictCode
+     * @param value
+     * @return
+     */
+    @GetMapping("getName/{dictCode}/{value}")
+    public String getName(@PathVariable String dictCode, @PathVariable String value) {
+        String dictName = dictService.getDictName(dictCode, value);
+        return dictName;
+    }
+
+    /**
+     * 根据 value 查询
+     * @param value
+     * @return
+     */
+    @GetMapping("getName/{value}")
+    public String getName(@PathVariable String value) {
+        String dictName = dictService.getDictName("", value);
+        return dictName;
+    }
 }
