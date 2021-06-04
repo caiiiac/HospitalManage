@@ -27,12 +27,11 @@ public class HospitalServiceImpl implements HospitalService {
         Hospital hospitalExist = hospitalRepository.getHospitalByHoscode(hoscode);
 
         // 存在
-        if (hospital != null) {
-            hospital.setStatus(hospitalExist.getStatus());
-            hospital.setCreateTime(hospitalExist.getCreateTime());
-            hospital.setUpdateTime(new Date());
-            hospital.setIsDeleted(0);
-            hospitalRepository.save(hospital);
+        if (hospitalExist != null) {
+            hospitalExist.setStatus(hospital.getStatus());
+            hospitalExist.setUpdateTime(new Date());
+            hospitalExist.setIsDeleted(0);
+            hospitalRepository.save(hospitalExist);
         } else {
             hospital.setStatus(0);
             hospital.setCreateTime(new Date());
