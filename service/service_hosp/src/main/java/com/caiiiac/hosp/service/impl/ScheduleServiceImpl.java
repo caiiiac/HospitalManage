@@ -1,7 +1,6 @@
 package com.caiiiac.hosp.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.caiiiac.hosp.model.hosp.Department;
 import com.caiiiac.hosp.model.hosp.Schedule;
 import com.caiiiac.hosp.repository.ScheduleRepository;
 import com.caiiiac.hosp.service.ScheduleService;
