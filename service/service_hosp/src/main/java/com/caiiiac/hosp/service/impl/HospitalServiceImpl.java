@@ -1,6 +1,7 @@
 package com.caiiiac.hosp.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.caiiiac.hosp.cmn.client.DictFeignClient;
 import com.caiiiac.hosp.model.hosp.Hospital;
 import com.caiiiac.hosp.repository.HospitalRepository;
 import com.caiiiac.hosp.service.HospitalService;
@@ -18,6 +19,9 @@ public class HospitalServiceImpl implements HospitalService {
 
     @Autowired
     private HospitalRepository hospitalRepository;
+
+    @Autowired
+    private DictFeignClient dictFeignClient;
 
     @Override
     public void save(Map<String, Object> paramMap) {
@@ -65,7 +69,19 @@ public class HospitalServiceImpl implements HospitalService {
 
         Example<Hospital> example = Example.of(hospital, matcher);
 
-        Page<Hospital> all = hospitalRepository.findAll(example, pageable);
-        return all;
+        Page<Hospital> pages = hospitalRepository.findAll(example, pageable);
+
+        pages.getContent().stream().forEach(item -> {
+            String hostypeString = dictFeignClient.getName("Hostype", hospital.getHostype());
+            // 查询省市区
+            String provinceString = dictFeignClient.getName(hospital.getProvinceCode());
+            String cityString = dictFeignClient.getName(hospital.getCityCode());
+            String districtString = dictFeignClient.getName(hospital.getDistrictCode());
+
+            item.getParam().put("fullAddress", provinceString + cityString + districtString);
+            item.getParam().put("hostypeString", hostypeString);
+        });
+
+        return pages;
     }
 }
